@@ -6,6 +6,7 @@ import org.yearup.models.Category;
 import org.yearup.models.Product;
 
 import javax.sql.DataSource;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -112,32 +113,40 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
     @Override
     public void update(int categoryId, Category category)
     {
-        @Override
-        public void update(int productId, Product product)
-        {
+
             String sql = "UPDATE products" +
                     " SET name = ? " +
-                    "   , price = ? " +
-                    "   , category_id = ? " +
-                    "   , description = ? " +
-                    "   , color = ? " +
-                    "   , image_url = ? " +
-                    "   , stock = ? " +
-                    "   , featured = ? " +
-                    " WHERE product_id = ?;";
+                    "WHERE category_id = ?";
+
 
             try (Connection connection = getConnection())
             {
                 PreparedStatement statement = connection.prepareStatement(sql);
-                statement.setString(1, product.getName());
-                statement.setBigDecimal(2, product.getPrice());
-                statement.setInt(3, product.getCategoryId());
-                statement.setString(4, product.getDescription());
-                statement.setString(5, product.getColor());
-                statement.setString(6, product.getImageUrl());
-                statement.setInt(7, product.getStock());
-                statement.setBoolean(8, product.isFeatured());
-                statement.setInt(9, productId);
+                statement.setString(1, category.getName());
+                statement.setInt(2, category.getCategoryId());
+                statement.setString(3, category.getDescription());
+
+                statement.executeUpdate();
+            }
+            catch (SQLException e)
+            {
+                throw new RuntimeException(e);
+            }
+    }
+
+    // delete category
+
+    @Override
+    public void delete(int categoryId)
+        {
+
+            String sql = "DELETE FROM category " +
+                    " WHERE categoryId = ?;";
+
+            try (Connection connection = getConnection())
+            {
+                PreparedStatement statement = connection.prepareStatement(sql);
+                statement.setInt(1, categoryId);
 
                 statement.executeUpdate();
             }
@@ -147,30 +156,20 @@ public class MySqlCategoryDao extends MySqlDaoBase implements CategoryDao
             }
         }
 
+        protected static Category mapRow(ResultSet row) throws SQLException
+        {
+            int categoryId = row.getInt("product_id");
+            String name = row.getString("name");
+            String description = row.getString("description");
 
-        // update category
+
+            return new Category(categoryId,name,description);
+        }
     }
 
-    @Override
-    public void delete(int categoryId)
-    {
-        // delete category
-    }
 
-    private Category mapRow(ResultSet row) throws SQLException
-    {
-        int categoryId = row.getInt("category_id");
-        String name = row.getString("name");
-        String description = row.getString("description");
 
-        Category category = new Category()
-        {{
-            setCategoryId(categoryId);
-            setName(name);
-            setDescription(description);
-        }};
 
-        return category;
-    }
 
-}
+
+
